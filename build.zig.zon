@@ -1,0 +1,13 @@
+.{
+    .name = .electro_sos,
+    .version = "0.0.1",
+    .dependencies = .{
+        .clap = .{
+            .url = "git+https://github.com/Hejsil/zig-clap#fc1e5cc3f6d9d3001112385ee6256d694e959d2f",
+            .hash = "clap-0.11.0-oBajB7foAQC3Iyn4IVCkUdYaOVVng5IZkSncySTjNig1",
+        },
+    },
+    .minimum_zig_version = "0.16.0-dev.3061+9b1eaad13",
+    .paths = .{""},
+    .fingerprint = 0x62502aa60fe79352,
+}
