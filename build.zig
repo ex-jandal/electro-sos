@@ -1,19 +1,45 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{ 
+        .default_target = .{ 
+            .abi = .musl,
+            .cpu_arch = .x86_64,
+            .os_tag = .linux,
+        }
+    });
+    const optimize = b.standardOptimizeOption(.{ 
+        .preferred_optimize_mode = .ReleaseFast,
+    });
+
     const mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
-        .target = b.graph.host,
+        .target = target,
+        .optimize = optimize,
     });
 
     const exe = b.addExecutable(.{
         .name = "elctrosos",
         .root_module = mod,
+        .linkage = .static,
+        .version = .{
+            .major = 0,
+            .minor = 1,
+            .patch = 0,
+        }
     });
 
     // clap parser
     const clap = b.dependency("clap", .{});
     exe.root_module.addImport("clap", clap.module("clap"));
+
+    // pass version to main
+    const version = b.option([]const u8, "version", "application version string") orelse "0.0.0";
+    const options = b.addOptions();
+    options.addOption([]const u8, "version", version);
+    options.addOption([]const u8, "bin_name", exe.name);
+
+    exe.root_module.addOptions("config", options);
 
     b.installArtifact(exe);
 
@@ -28,7 +54,7 @@ pub fn build(b: *std.Build) void {
         run_cmd.addArgs(args);
     }
 
-    // this one for testing `zig build test`
+    // this one for testing command `zig build test`
     const mod_tests = b.addTest(.{
         .root_module = mod,
     });
