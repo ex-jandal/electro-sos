@@ -96,7 +96,7 @@ pub fn main(init: std.process.Init) !void {
             );
         var radar_async = io.@"async"(
             radar,
-            .{io, &current_measurement}
+            .{init, &current_measurement}
         );
 
         var buffer: [1024]u8 = undefined;
@@ -152,26 +152,25 @@ fn store_income(
         }
 
         // print("\x1B[2J\x1B[H", .{});
-        print("\x1b[7;H\x1b[J", .{});
-        print("income_stream: {d}\n", .{random_number});
+        // print("income_stream: {d}\n", .{random_number});
         try io.sleep(.fromMilliseconds(TIME_OFFSET), .awake);
     }
 }
 
-fn radar(io: std.Io, current: *CurrentMeasurement) !void {
+fn radar(init: std.process.Init, current: *CurrentMeasurement) !void {
     while (true) {
         var current_val: isize = undefined;
         var current_lvl: WarningLevel = undefined;
         
         {
-            try current.*.mutex.lock(io);
-            defer current.*.mutex.unlock(io);
+            try current.*.mutex.lock(init.io);
+            defer current.*.mutex.unlock(init.io);
             
             current_val = current.*.value;
             current_lvl = current.*.Level;
         }
 
-
+        print("\x1b[7;H\x1b[J", .{});
         print(
             \\Measurement {{ 
             \\  value: {d},
@@ -181,12 +180,42 @@ fn radar(io: std.Io, current: *CurrentMeasurement) !void {
             , .{ current_val, @tagName(current_lvl) });
 
         switch (current_lvl) {
-            .Danger => print("Fahhhhh\n", .{}),
-            .UnderTheRate => print("WoooooooW\n", .{}),
+            .Danger => {
+                print("Mama Mia\n", .{});
+                const sound = try std.Thread.spawn(.{}, play_sound, .{init, SoundOption.MamaMia});
+                defer sound.detach();
+            },
+            .UnderTheRate => {
+                print("Rizz\n", .{});
+                const sound = try std.Thread.spawn(.{}, play_sound, .{init, SoundOption.Rizz});
+                defer sound.detach();
+            },
             .Normal => print("67\n", .{}),
         }
         print("\n", .{});
 
-        try io.sleep(.fromMilliseconds(TIME_OFFSET), .awake);
+        try init.io.sleep(.fromMilliseconds(TIME_OFFSET), .awake);
+    }
+}
+
+const SoundOption = enum {
+    MamaMia,
+    Rizz,
+};
+
+fn play_sound(init: std.process.Init, option: SoundOption) !void {
+    switch (option) {
+        .MamaMia => {
+            const argv = &[_][]const u8{ "src/c/player", "sounds/mama_mia.wav" };
+            var sound = try 
+                std.process.spawn(init.io, .{ .argv = argv });
+            _ = try sound.wait(init.io);
+        },
+        .Rizz => {
+            const argv = &[_][]const u8{ "src/c/player", "sounds/rizz.wav" };
+            var sound = try 
+                std.process.spawn(init.io, .{ .argv = argv });
+            _ = try sound.wait(init.io);
+        },
     }
 }

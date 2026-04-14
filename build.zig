@@ -41,6 +41,17 @@ pub fn build(b: *std.Build) void {
 
     exe.root_module.addOptions("config", options);
 
+    // compile the player first...
+    const player_argv = &[_][]const u8{ "gcc", "-fPIC", "src/c/player.c", "-o", "src/c/player", "-lm", "-lpthread", "-ldl" };
+
+    std.debug.print("Compile player with (", .{});
+    for (player_argv) |c| {
+        std.debug.print("{s} ", .{c});
+    }
+    std.debug.print(")\n", .{});
+
+    _ = b.run(player_argv);
+
     b.installArtifact(exe);
 
     // to make `zig build run` happen
