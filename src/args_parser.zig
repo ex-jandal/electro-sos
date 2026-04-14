@@ -5,20 +5,22 @@ const clap = @import("clap");
 const print = std.debug.print;
 const exit = std.process.exit;
 
-pub const ArgsRange = struct {
+pub const ArgValues = struct {
     from: isize,
     to: isize,
+    time: usize = 1000,
 };
 
 const flags = 
     \\  -f, --from    <isize> from.
     \\  -t, --to      <isize> to.
+    \\  -i, --time    <usize> time offset.
     \\  
     \\  -h, --help            Display this help and exit.
     \\  -v, --version         Display the app version.
     ;
 
-pub fn parse(init: std.process.Init, allocator: std.mem.Allocator) !ArgsRange {
+pub fn parse(init: std.process.Init, allocator: std.mem.Allocator) !ArgValues {
     const params = comptime clap.parseParamsComptime(flags);
 
     var diag = clap.Diagnostic{};
@@ -76,5 +78,14 @@ pub fn parse(init: std.process.Init, allocator: std.mem.Allocator) !ArgsRange {
         return error.StupidRange;
     }
 
-    return .{ .from = range_from, .to = range_to };
+    var args: ArgValues = .{ 
+        .from = range_from, 
+        .to = range_to,
+    };
+
+    if (res.args.time) |t| {
+        args.time = t;
+    }
+
+    return args;
 }
