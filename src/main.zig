@@ -158,6 +158,13 @@ fn store_income(
 }
 
 fn radar(init: std.process.Init, current: *CurrentMeasurement) !void {
+    var coercion_buffer = [1]u8{ 0 } ** 1024;
+    const preoid_str = std.fmt.bufPrint(
+            &coercion_buffer, 
+            "{any}", 
+            .{@divTrunc(TIME_OFFSET, 1000)}
+        ) catch "1";
+
     while (true) {
         var current_val: isize = undefined;
         var current_lvl: WarningLevel = undefined;
@@ -181,13 +188,15 @@ fn radar(init: std.process.Init, current: *CurrentMeasurement) !void {
 
         switch (current_lvl) {
             .Danger => {
-                print("Mama Mia\n", .{});
-                const sound = try std.Thread.spawn(.{}, play_sound, .{init, SoundOption.MamaMia});
+                print("Maaaa\n", .{});
+                const sound = try 
+                    std.Thread.spawn(.{}, play_sound, .{init, preoid_str, SoundOption.Maaaaa});
                 defer sound.detach();
             },
             .UnderTheRate => {
                 print("Rizz\n", .{});
-                const sound = try std.Thread.spawn(.{}, play_sound, .{init, SoundOption.Rizz});
+                const sound = try 
+                    std.Thread.spawn(.{}, play_sound, .{init, preoid_str, SoundOption.Rizz});
                 defer sound.detach();
             },
             .Normal => print("67\n", .{}),
@@ -199,20 +208,20 @@ fn radar(init: std.process.Init, current: *CurrentMeasurement) !void {
 }
 
 const SoundOption = enum {
-    MamaMia,
+    Maaaaa,
     Rizz,
 };
 
-fn play_sound(init: std.process.Init, option: SoundOption) !void {
+fn play_sound(init: std.process.Init, preiod_str: []const u8, option: SoundOption) !void {
     switch (option) {
-        .MamaMia => {
-            const argv = &[_][]const u8{ "src/c/player", "sounds/mama_mia.wav" };
+        .Maaaaa => {
+            const argv = &[_][]const u8{ "src/c/player", "sounds/mario_screaming.wav", preiod_str };
             var sound = try 
                 std.process.spawn(init.io, .{ .argv = argv });
             _ = try sound.wait(init.io);
         },
         .Rizz => {
-            const argv = &[_][]const u8{ "src/c/player", "sounds/rizz.wav" };
+            const argv = &[_][]const u8{ "src/c/player", "sounds/rizz.wav", preiod_str };
             var sound = try 
                 std.process.spawn(init.io, .{ .argv = argv });
             _ = try sound.wait(init.io);

@@ -2,6 +2,7 @@
 #include "miniaudio/miniaudio.h"
 
 #include <unistd.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -17,7 +18,7 @@ int main(int argc, char *argv[])
   // Play a sound file
   ma_engine_play_sound(&engine, argv[1], NULL);
 
-  sleep(5);
+  sleep(atoi(argv[2]));
   ma_engine_uninit(&engine);
   return EXIT_SUCCESS;
 }
