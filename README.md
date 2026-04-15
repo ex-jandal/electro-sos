@@ -8,7 +8,7 @@
 
 - **Real-time Monitoring**: Tracks simulated static electricity measurements.
 - **Audio Alerts**:
-  - 🚨 **Danger**: Plays "Mama Mia" when levels are too high.
+  - 🚨 **Danger**: Plays "Mmaaa" when levels are too high.
   - 📉 **Under the Rate**: Plays "Rizz" when levels are too low.
 - **Configurable**: Set your own safe ranges and polling intervals.
 - **Cross-Language**: Core logic in **Zig** with a **C**-based audio player.
